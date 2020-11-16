@@ -38,25 +38,23 @@ from absl import flags
 
 SUITE_NAME_TO_TARGET = {
     'e2e_tests':
-        '//integrations/tensorflow/e2e:e2e_tests',
-    'mobile_bert_squad_tests':
-        '//integrations/tensorflow/e2e:mobile_bert_squad_tests',
-    'keras_tests':
-        '//integrations/tensorflow/e2e/keras:keras_tests',
+        '//integrations/tensorflow/e2e/tf:e2e_tests',
     'layers_tests':
-        '//integrations/tensorflow/e2e/keras/layers:layers_tests',
+        '//integrations/tensorflow/e2e/tf/keras/layers:layers_tests',
     'layers_dynamic_batch_tests':
-        '//integrations/tensorflow/e2e/keras/layers:layers_dynamic_batch_tests',
+        '//integrations/tensorflow/e2e/tf/keras/layers:layers_dynamic_batch_tests',
     'layers_training_tests':
-        '//integrations/tensorflow/e2e/keras/layers:layers_training_tests',
+        '//integrations/tensorflow/e2e/tf/keras/layers:layers_training_tests',
+    'mobile_bert_squad_tests':
+        '//integrations/tensorflow/e2e/models/mobile_bert:mobile_bert_squad_tests',
     'keyword_spotting_tests':
-        '//integrations/tensorflow/e2e/keras:keyword_spotting_tests',
+        '//integrations/tensorflow/e2e/models/kws_streaming:keyword_spotting_tests',
     'keyword_spotting_internal_streaming_tests':
-        '//integrations/tensorflow/e2e/keras:keyword_spotting_internal_streaming_tests',
+        '//integrations/tensorflow/e2e/models/kws_streaming:keyword_spotting_internal_streaming_tests',
     'imagenet_non_hermetic_tests':
-        '//integrations/tensorflow/e2e/keras:imagenet_non_hermetic_tests',
+        '//integrations/tensorflow/e2e/models/keras_applications:imagenet_non_hermetic_tests',
     'slim_vision_tests':
-        '//integrations/tensorflow/e2e/slim_vision_models:slim_vision_tests',
+        '//integrations/tensorflow/e2e/models/slim_vision:slim_vision_tests',
 }
 SUITES_HELP = [f'`{name}`' for name in SUITE_NAME_TO_TARGET]
 SUITES_HELP = f'{", ".join(SUITES_HELP[:-1])} and {SUITES_HELP[-1]}'

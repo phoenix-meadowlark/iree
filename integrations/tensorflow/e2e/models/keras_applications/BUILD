@@ -43,7 +43,7 @@ package(
 DOC = """
 vision_model_test_manual is for manual testing of all keras vision models.
 Test will run only manually with all parameters specified manually, for example:
-bazel run -c opt integrations/tensorflow/e2e/keras:vision_model_test_manual -- \
+bazel run -c opt integrations/tensorflow/e2e/models/keras_applications:vision_model_test_manual -- \
 --target_backends=tf,iree_vmla,iree_llvmjit \
 --data=imagenet \
 --url=https://storage.googleapis.com/iree_models/ \

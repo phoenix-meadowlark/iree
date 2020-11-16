@@ -114,7 +114,7 @@ You can manually get the benchmarking artifacts for a specific test by using
 automatically store the benchmarking artifacts in `/tmp/iree/modules/`.
 
 ```shell
-$ bazel run //integrations/tensorflow/e2e:matrix_ops_static_test_manual -- \
+$ bazel run //integrations/tensorflow/e2e/tf:matrix_ops_static_test_manual -- \
   --target_backends=iree_vmla,tflite
 ```
 
