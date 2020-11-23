@@ -140,6 +140,21 @@ pybind_cc_library(
 )
 
 iree_py_test(
+    name = "deterministic_asm_test",
+    srcs = ["deterministic_asm_test.py"],
+    python_version = "PY3",
+    tags = [
+        "failing",
+        "nokokoro",
+        "notap",
+    ],
+    deps = INTREE_TENSORFLOW_PY_DEPS + NUMPY_DEPS + [
+        "@absl_py//absl/testing:absltest",
+        "//integrations/tensorflow/bindings/python/pyiree/tf/compiler",
+    ],
+)
+
+iree_py_test(
     name = "saved_model_test",
     srcs = ["saved_model_test.py"],
     python_version = "PY3",

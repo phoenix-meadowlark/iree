@@ -459,13 +459,15 @@ flags.DEFINE_bool(
 flags.DEFINE_bool("training", False,
                   "Whether or not to compile the layer in training mode.")
 flags.DEFINE_bool(
-    "test_default_kwargs_only", True,
+    "test_default_kwargs_only", False,
     "Whether or not to test multiple layer configurations using non-required "
     "kwargs.")
 flags.DEFINE_bool(
     "list_layers_with_full_api_tests", False,
     "Whether or not to print out all layers with non-default configurations "
     "(and skip running the tests).")
+flags.DEFINE_string("unit_test_name", None,
+                    "Only test a specific unit test for the given layer.")
 
 
 def get_input(shape: Sequence[int]) -> tf.keras.layers.Input:
@@ -548,6 +550,10 @@ class KerasLayersModule(tf_test_utils.TestModule):
         # CPU or that are mutually exclusive. This allows us to take a product
         # like that in CONV_KWARGS_TO_VALUE and filter out the configurations
         # lacking support for particular layers.
+        continue
+
+      if (FLAGS.unit_test_name is not None and
+          FLAGS.unit_test_name != unit_test_spec.unit_test_name):
         continue
 
       model = create_wrapped_keras_layer(FLAGS.layer, unit_test_spec)
