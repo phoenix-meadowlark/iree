@@ -23,7 +23,7 @@ import tarfile
 from common.benchmark_driver import BenchmarkDriver
 from common.benchmark_suite import MODEL_FLAGFILE_NAME, BenchmarkCase, BenchmarkSuite
 from common.benchmark_config import BenchmarkConfig
-from common.benchmark_definition import execute_cmd, execute_cmd_and_get_output, get_git_commit_hash, get_iree_benchmark_module_arguments, wait_for_iree_benchmark_module_start
+from common.benchmark_definition import execute_cmd, execute_benchmark_and_get_result_json, get_git_commit_hash, get_iree_benchmark_module_arguments, wait_for_iree_benchmark_module_start
 from common.linux_device_utils import get_linux_device_info
 from e2e_test_framework.definitions import iree_definitions
 from e2e_test_framework import serialization
@@ -109,10 +109,13 @@ class LinuxBenchmarkDriver(BenchmarkDriver):
               driver_info=benchmark_case.driver_info,
               benchmark_min_time=self.config.benchmark_min_time))
 
-    result_json = execute_cmd_and_get_output(
-        cmd, cwd=benchmark_case.benchmark_case_dir, verbose=self.verbose)
+    result_json = execute_benchmark_and_get_result_json(
+        cmd,
+        results_filename=str(results_filename),
+        cwd=benchmark_case.benchmark_case_dir,
+        verbose=self.verbose)
     if self.verbose:
-      print(result_json)
+      print(f"result_json = {result_json}")
 
   def __run_capture(self, benchmark_case: BenchmarkCase,
                     capture_filename: pathlib.Path):
@@ -142,7 +145,7 @@ def main(args):
   device_info = get_linux_device_info(args.device_model, args.cpu_uarch,
                                       args.gpu_id, args.verbose)
   if args.verbose:
-    print(device_info)
+    print(f"{device_info = }")
 
   commit = get_git_commit_hash("HEAD")
   benchmark_config = BenchmarkConfig.build_from_args(args, commit)
@@ -184,12 +187,12 @@ def main(args):
       f.write(benchmark_results.to_json_str())
 
   if args.verbose:
-    print(benchmark_results.commit)
-    print(benchmark_results.benchmarks)
+    print(f"{benchmark_results.commit = }")
+    print(f"{benchmark_results.benchmarks = }")
 
   trace_capture_config = benchmark_config.trace_capture_config
   if trace_capture_config:
-    # Put all captures in a tarball and remove the origial files.
+    # Put all captures in a tarball and remove the original files.
     with tarfile.open(trace_capture_config.capture_tarball, "w:gz") as tar:
       for capture_filename in benchmark_driver.get_capture_filenames():
         tar.add(capture_filename)

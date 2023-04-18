@@ -147,7 +147,8 @@ class BenchmarkDriver(object):
       result_json_object = json.loads(path.read_text())
       benchmark_run = BenchmarkRun(benchmark_info,
                                    result_json_object["context"],
-                                   result_json_object["benchmarks"])
+                                   result_json_object["benchmarks"],
+                                   result_json_object.get("statistics", {}))
       results.benchmarks.append(benchmark_run)
 
     return results

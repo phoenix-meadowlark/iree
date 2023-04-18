@@ -394,7 +394,7 @@ def main(args):
     print(benchmark_results.benchmarks)
 
   if trace_capture_config:
-    # Put all captures in a tarball and remove the origial files.
+    # Put all captures in a tarball and remove the original files.
     with tarfile.open(trace_capture_config.capture_tarball, "w:gz") as tar:
       for capture_filename in benchmark_driver.get_capture_filenames():
         tar.add(capture_filename)

@@ -119,6 +119,40 @@ def execute_cmd_and_get_output(args: Sequence[Any],
                      **kwargs).stdout.strip()
 
 
+def _parse_iree_allocation_statistics(
+    benchmark_stderr: str) -> Dict[str, Dict[str, int]]:
+  statistics = {}
+  for device in ["HOST_LOCAL", "DEVICE_LOCAL"]:
+    statistics[device] = {}
+    for stat in ["peak", "allocated", "freed", "live"]:
+      m = re.search(rf".*{device}:.*\s([0-9]+)B {stat}", benchmark_stderr)
+      statistics[device][stat] = int(m.group(1))
+  return statistics
+
+
+def execute_benchmark_and_get_result_json(args: Sequence[Any],
+                                          results_filename: pathlib.Path,
+                                          verbose: bool = False,
+                                          **kwargs) -> str:
+  exc = execute_cmd(args,
+                    verbose=verbose,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    **kwargs)
+
+  # Add IREE's memory statistics to the result json.
+  result_str = exc.stdout.strip()
+  result_json = json.loads(result_str)
+  stderr = exc.stderr.strip()
+  result_json["statistics"] = _parse_iree_allocation_statistics(stderr)
+
+  # Overwrite the result json to include the statistics.
+  result_str = json.dumps(result_json, indent=4)
+  with open(results_filename, "w") as f:
+    f.write(result_str)
+  return result_str
+
+
 def get_git_commit_hash(commit: str) -> str:
   return execute_cmd_and_get_output(['git', 'rev-parse', commit],
                                     cwd=pathlib.Path(__file__).resolve().parent)
@@ -142,6 +176,7 @@ def get_iree_benchmark_module_arguments(
       "--benchmark_format=json",
       "--benchmark_out_format=json",
       f"--benchmark_out={results_filename}",
+      "--print_statistics=true",
   ]
   if benchmark_min_time:
     cmd.extend([
@@ -400,12 +435,14 @@ class BenchmarkRun(object):
   benchmark_info: BenchmarkInfo
   context: Dict[str, Any]
   results: Sequence[Dict[str, Any]]
+  statistics: Dict[str, Dict[str, int]]
 
   def to_json_object(self) -> Dict[str, Any]:
     return {
         "benchmark_info": self.benchmark_info.to_json_object(),
         "context": self.context,
         "results": self.results,
+        "statistics": self.statistics,
     }
 
   def to_json_str(self) -> str:
@@ -415,7 +452,10 @@ class BenchmarkRun(object):
   def from_json_object(json_object: Dict[str, Any]):
     return BenchmarkRun(
         BenchmarkInfo.from_json_object(json_object["benchmark_info"]),
-        json_object["context"], json_object["results"])
+        json_object["context"],
+        json_object["results"],
+        json_object["statistics"],
+    )
 
 
 class BenchmarkResults(object):
@@ -439,7 +479,7 @@ class BenchmarkResults(object):
     self.benchmarks.extend(other.benchmarks)
 
   def get_aggregate_time(self, benchmark_index: int, kind: str) -> int:
-    """Returns the Google Benchmark aggreate time for the given kind.
+    """Returns the Google Benchmark aggregate time for the given kind.
 
       Args:
       - benchmark_index: the benchmark's index.
